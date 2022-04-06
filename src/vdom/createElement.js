@@ -1,7 +1,11 @@
 export default (tagName, { attrs = {}, children = [] } = {}) => {
-  return {
+  const vElem = Object.create(null);
+
+  Object.assign(vElem, {
     tagName,
     attrs,
     children,
-  };
+  });
+
+  return vElem;
 };
