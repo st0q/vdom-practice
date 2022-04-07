@@ -1,5 +1,13 @@
 import render from './render';
 
+const zip = (xs, ys) => {
+  const zipped = [];
+  for (let i = 0; i < Math.min(xs.length, ys.length); i++) {
+    zipped.push([xs[i], ys[i]]);
+  }
+  return zipped;
+};
+
 const diffAttrs = (oldAttrs, newAttrs) => {
   const patches = [];
 
@@ -38,7 +46,7 @@ const diffChildren = (oldVChildren, newVChildren) => {
   const additionalPatches = [];
   for (const additionalVChild of newVChildren.slice(oldVChildren.length)) {
     additionalPatches.push($node => {
-      $node.appendChild(render(newVChildren));
+      $node.appendChild(render(additionalVChild));
       return $node;
     });
   }
@@ -46,9 +54,9 @@ const diffChildren = (oldVChildren, newVChildren) => {
   return $parent => {
     // since childPatches are expecting the $child, not $parent,
     // we cannot just loop through them and call patch($parent)
-    $parent.childNodes.forEach(($child, i) => {
-      childPatches[i]($child);
-    });
+    for (const [patch, $child] of zip(childPatches, $parent.childNodes)) {
+      patch($child);
+    }
 
     for (const patch of additionalPatches) {
       patch($parent);
@@ -101,7 +109,6 @@ const diff = (oldVTree, newVTree) => {
   }
 
   const patchAttrs = diffAttrs(oldVTree.attrs, newVTree.attrs);
-  console.log(patchAttrs)
   const patchChildren = diffChildren(oldVTree.children, newVTree.children);
 
   return $node => {
